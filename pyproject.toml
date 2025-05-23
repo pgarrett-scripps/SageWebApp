@@ -8,22 +8,20 @@ version = "0.1.0"
 description = "Web applications for Sage MS/MS search engine"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
 authors = [
     {name = "Patrick Garrett", email = "pgarrett@scripps.edu"}
 ]
 dependencies = [
-    "pandas>=2.2.3",
-    "requests>=2.32.3",
-    "streamlit>=1.45.1",
-    "streamlit-permalink-pg>=1.4.0",
+    "pandas",
+    "requests",
+    "streamlit",
+    "streamlit-permalink-pg",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "black>=23.0.0",
-    "isort>=5.10.0",
+    "pytest",
+    "black",
 ]
 
 [project.scripts]
