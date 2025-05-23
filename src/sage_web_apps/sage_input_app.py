@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import streamlit as st
 import json
@@ -5,6 +6,7 @@ from typing import Dict, List
 import streamlit_permalink as stp
 
 
+is_local = os.getenv("LOCAL", "True") == "True"
 
 def update_query_dataframe(
     key: str, df: pd.DataFrame, append: bool, is_static: bool
@@ -116,6 +118,43 @@ def main():
         mzml_df = pd.DataFrame(columns=["mzML Path"])
         mzml_df["mzML Path"] = ["/path/to/mzml"]
 
+
+        if is_local:
+            c1, c2 = st.columns([2,1], vertical_alignment="center")
+
+            with c1:
+                folder_path = st.text_input(
+                    label="Folder Path",
+                    placeholder="path/to/folder",
+                    value=None,
+                    help="Path to the folder containing mzML files",
+                )
+
+                # fix folder path for windows
+                if os.name == "nt" and folder_path:
+                    folder_path = folder_path.replace("\\", "/")
+                
+            with c2:
+                if st.button("Load Files", use_container_width=True):
+                    # Load mzML files from the folder
+                    if folder_path:
+                        mzml_files = [
+                            os.path.join(folder_path, f)
+                            for f in os.listdir(folder_path)
+                            if f.endswith(".mzML") or f.endswith(".mzml") or f.endswith(".mzML.gz") or f.endswith(".d")
+                        ]
+                        if len(mzml_files) == 0:
+                            error_container.error(
+                                "No mzML files found in the specified folder."
+                            )
+                        else:
+                            mzml_df = pd.DataFrame(columns=["mzML Path"])
+                            mzml_df["mzML Path"] = mzml_files
+                            st.session_state.mzml_df = mzml_df
+                    else:
+                        error_container.error("Please specify a folder path.")
+           
+
         st.caption("mzml paths")
         mzml_df = st.data_editor(
             mzml_df,
@@ -127,7 +166,7 @@ def main():
             hide_index=True,
             num_rows="dynamic",
             use_container_width=True,
-            height=300,
+            height=245 if is_local else 300,
         )
 
         mzml_paths = mzml_df["mzML Path"].tolist()
