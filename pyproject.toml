@@ -15,7 +15,7 @@ dependencies = [
     "pandas",
     "requests",
     "streamlit",
-    "streamlit_permalink_pg",
+    "streamlit-permalink-pg",
 ]
 
 [project.optional-dependencies]
