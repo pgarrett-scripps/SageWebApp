@@ -32,11 +32,12 @@ elif arch == "aarch64":
 else:
     st.error("Unsupported architecture. Please use x86_64 or aarch64.")
 
+
 # download sage
 def download_sage(arch):
     url = sage_files[arch]
     st.info(f"Downloading Sage from {url}...")
-    
+
     try:
         # Create a temporary directory
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -46,26 +47,30 @@ def download_sage(arch):
             if response.status_code != 200:
                 st.error(f"Failed to download Sage: HTTP status {response.status_code}")
                 return
-                
+
             with open(tar_path, "wb") as f:
                 f.write(response.content)
-            
+
             # Extract the tar file
             with tarfile.open(tar_path, "r:gz") as tar:
                 tar.extractall(path=tmp_dir)
-            
+
             # Find the extracted directory (should be sage-v*-arch-*-linux-gnu)
-            extracted_dirs = [d for d in os.listdir(tmp_dir) if d.startswith("sage-v") and os.path.isdir(os.path.join(tmp_dir, d))]
+            extracted_dirs = [
+                d
+                for d in os.listdir(tmp_dir)
+                if d.startswith("sage-v") and os.path.isdir(os.path.join(tmp_dir, d))
+            ]
             if not extracted_dirs:
                 st.error("Could not find extracted Sage directory")
                 return
-                
+
             extracted_dir = os.path.join(tmp_dir, extracted_dirs[0])
-            
+
             # Create the sage directory in the current working directory
             sage_dir = os.path.join(os.getcwd(), "sage")
             os.makedirs(sage_dir, exist_ok=True)
-            
+
             # Copy the sage executable and other files
             for file in os.listdir(extracted_dir):
                 src = os.path.join(extracted_dir, file)
@@ -74,7 +79,7 @@ def download_sage(arch):
                     shutil.copy2(src, dst)
                     if file == "sage":  # Make the sage executable actually executable
                         os.chmod(dst, 0o755)
-                        
+
             st.success("Sage downloaded and installed successfully")
     except Exception as e:
         st.error(f"Error downloading or extracting Sage: {str(e)}")
@@ -85,11 +90,12 @@ def load_sage(arch):
     # Check if sage directory exists
     if not os.path.exists("sage"):
         download_sage(arch)
-    
+
     # Update PATH and return sage executable path
     sage_dir = os.path.abspath("sage")
     os.environ["PATH"] += os.pathsep + sage_dir
     return os.path.join(sage_dir, "sage")  # Return the full path to the sage executable
+
 
 sage_path = load_sage(arch)
 
@@ -100,19 +106,24 @@ with st.sidebar:
     st.info(f"Running on: {platform.system()} {arch}")
 
     try:
-        result = subprocess.run([sage_path, "--version"], capture_output=True, text=True)
+        result = subprocess.run(
+            [sage_path, "--version"], capture_output=True, text=True
+        )
         st.info(f"Sage version: {result.stdout.strip()}")
     except Exception as e:
         st.error(f"Failed to get Sage version: {str(e)}")
 
     fasta_file = st.file_uploader("Upload FASTA file", type=["fasta"])
-    mzml_files = st.file_uploader("Upload mzML files", type=["mzml", "mzml.gz"], accept_multiple_files=True)
+    mzml_files = st.file_uploader(
+        "Upload mzML files", type=["mzml", "mzml.gz"], accept_multiple_files=True
+    )
     json_file = st.file_uploader("Upload JSON file", type=["json"])
 
-    include_fragment_annotations = st.checkbox("Include fragment annotations", value=True)
+    include_fragment_annotations = st.checkbox(
+        "Include fragment annotations", value=True
+    )
     output_type = st.selectbox("Output type", ["csv", "parquet"])
     search_name = st.text_input("Search name", value="sage_search")
-
 
 
 if st.button("Run"):
@@ -149,11 +160,19 @@ if st.button("Run"):
 
         # Run the command
 
-        command = [sage_path, json_path, "".join(mzml_paths), "--output_directory", output_path, "--fasta", fasta_path]
+        command = [
+            sage_path,
+            json_path,
+            "".join(mzml_paths),
+            "--output_directory",
+            output_path,
+            "--fasta",
+            fasta_path,
+        ]
         if include_fragment_annotations:
             command.append("--annotate-matches")
 
-        if output_type == 'parquet':
+        if output_type == "parquet":
             command.append("--parquet")
 
         with st.spinner("Running Sage..."):
@@ -168,9 +187,9 @@ if st.button("Run"):
             with st.expander("Sage output", expanded=False):
                 stdout_tab, stderr_tab = st.tabs(["stdout", "stderr"])
                 with stdout_tab:
-                    st.code(result.stdout, language='text', height=300)
+                    st.code(result.stdout, language="text", height=300)
                 with stderr_tab:
-                    st.code(result.stderr, language='text', height=300)
+                    st.code(result.stderr, language="text", height=300)
 
             # download results (zip file)
             zip_path = os.path.join(tmp_dir, f"{search_name}.zip")
@@ -195,10 +214,10 @@ if st.button("Run"):
                     data=f,
                     file_name=f"{search_name}.zip",
                     mime="application/zip",
-                    on_click='ignore'
+                    on_click="ignore",
                 )
 
-            #show the results (either tsv or parquet files)
+            # show the results (either tsv or parquet files)
             st.subheader("Results")
             results = os.listdir(output_path)
             for file in results:
