@@ -22,7 +22,7 @@ cd SageWebApp
 pip install -e .
 
 # Run the config generator (app should open automatically, if not it will be availble at localhost:8501)
-sage-input
+sage-config
 
 # Run the search tool (app should open automatically, if not it will be availble at localhost:8501)
 sage-app
