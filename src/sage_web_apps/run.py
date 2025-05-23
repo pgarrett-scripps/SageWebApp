@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import subprocess
@@ -16,11 +17,43 @@ def run_streamlit_app(module_path):
     subprocess.run(cmd)
 
 def run_input_app():
+
+    # arg parse to get local
+
+    parser = argparse.ArgumentParser(description="Run the Sage input app.")
+    parser.add_argument(
+        "--server",
+        action="store_true",
+        help="Run the app in server mode (default: False)",
+    )
+
+    args = parser.parse_args()
+    if args.server:
+        os.environ["LOCAL"] = "False"
+    else:
+        # set env local to true if not set (running cli command)
+        os.environ["LOCAL"] = "True"
+
     """Run the sage_input_app.py streamlit application."""
     app_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sage_input_app.py")
     run_streamlit_app(app_path)
 
 def run_sage_app():
+
+    parser = argparse.ArgumentParser(description="Run the Sage app.")
+    parser.add_argument(
+        "--server",
+        action="store_true",
+        help="Run the app in server mode (default: False)",
+    )
+
+    args = parser.parse_args()
+    if args.server:
+        os.environ["LOCAL"] = "False"
+    else:
+        # set env local to true if not set (running cli command)
+        os.environ["LOCAL"] = "True"
+
     """Run the sage_app.py streamlit application."""
     app_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sage_app.py")
     run_streamlit_app(app_path)

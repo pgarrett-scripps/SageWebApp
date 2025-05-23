@@ -5,8 +5,8 @@ import json
 from typing import Dict, List
 import streamlit_permalink as stp
 
-
-is_local = os.getenv("LOCAL", "True") == "True"
+# if not set (running from community cloud = server mode)
+is_local = os.getenv("LOCAL", "False") == "True"
 
 def update_query_dataframe(
     key: str, df: pd.DataFrame, append: bool, is_static: bool
